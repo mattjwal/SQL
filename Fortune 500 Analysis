@@ -58,14 +58,14 @@ VALUES
 
 
 
--- A quick view of what information the database contains
+# A quick view of what information the database contains
 SELECT*
 FROM fortune_companies
 ;
 
 
 
--- Which industry has an average revue greater than or equal to 250 billion in descending order
+# Which industry has an average revue greater than or equal to 250 billion in descending order
 SELECT industry, AVG(revenue) 
 AS avg_revenue
 FROM fortune_companies
@@ -76,7 +76,7 @@ ORDER BY avg_revenue DESC
 
 
 
--- Which companies have greater than or equal to 120K employees, and which of those compamies have an average employee tenure greater than 5 years
+# Which companies have greater than or equal to 120K employees, and which of those compamies have an average employee tenure greater than 5 years
 SELECT company_name, employees, avg_employee_tenure
 FROM fortune_companies
 GROUP BY avg_employee_tenure
@@ -87,7 +87,7 @@ ORDER BY avg_employee_tenure DESC
 
 
 
--- Which companies value work life balance, determined by paid time off days allotment
+# Which companies value work life balance, determined by paid time off days allotment
 SELECT company_name, paid_time_off_days,
 CASE
   WHEN paid_time_off_days >= 18 THEN 'Good'
@@ -101,7 +101,7 @@ ORDER BY paid_time_off_days DESC
 
 
 
--- Assign all companies in the Technology industry as "Mother Friendly Workplace" , "Acceptable" , "Questionable" , and "Terrible" based on the maternity leave offered
+# Assign all companies in the Technology industry as "Mother Friendly Workplace" , "Acceptable" , "Questionable" , and "Terrible" based on the maternity leave offered
 SELECT company_name,
 CASE
   WHEN maternity_leave_weeks >= 15 THEN 'Mother Friendly Workplace'
@@ -116,7 +116,7 @@ ORDER BY technology_mother_friendliness ASC
 
 
 
--- Which Technology companies have the highest revenue in descending order
+# Which Technology companies have the highest revenue in descending order
 SELECT company_name, industry, revenue
 FROM fortune_companies
 Where industry = 'Technology'

@@ -1,7 +1,7 @@
 # This project reveals insights about TV and Movie content hosted on Netflix. 
 
 # The project was written using the PostgreSQL dialect and utilized data from the following two Netflix datasets:
-# Note: You can see it in db-fiddle using this link: https://www.db-fiddle.com/f/pfsdrKi9cgCDp4Wwb77AF/0 
+# Note: You can see the utilized data from the Netflix database here - https://www.db-fiddle.com/f/pfsdrKi9cgCDp4Wwb77AF/0
 
 
 

@@ -101,7 +101,6 @@ WHERE "type" = 'Movie'
 ORDER BY "show_id" ASC
 
 
-
 # When was the most recent batch of tv shows and/or movies added to the database?
 
 SELECT max(date(date_added))

@@ -68,76 +68,96 @@ VALUES
 
 
 #  What are the show_id's, who are the directors, what are the titles of each show_id, and what type of format are they, movie or tv show?
-SELECT people.show_id,
-people.director,
-titles.title,
-titles.type
+
+SELECT people.show_id
+, people.director
+, titles.title
+, titles.type
 FROM "netflix_people" people
 
 LEFT JOIN "netflix_titles_info" titles
-ON people.show_id = titles.show_id;
+ON people.show_id = titles.show_id
+;
 
 
 # How many movie titles are there in the database?
+
 SELECT count(*)
 FROM "netflix_titles_info"
-WHERE type = 'Movie';
+WHERE type = 'Movie'
+;
 
 
-# Which titles in the table are movies and display them in show_id ascending order
-SELECT titles.show_id,
-titles.title,
-titles.type
+# Which titles in the table are movies and display them in show_id ascending order.
+
+SELECT titles.show_id
+, titles.title
+, titles.type
 FROM "netflix_titles_info" titles
 
 RIGHT JOIN "netflix_people" people
 ON titles.show_id = people.show_id
 WHERE "type" = 'Movie'
-ORDER BY "show_id" ASC;
+ORDER BY "show_id" ASC
+
 
 
 # When was the most recent batch of tv shows and/or movies added to the database?
+
 SELECT max(date(date_added))
-FROM "netflix_titles_info";
+FROM "netflix_titles_info"
+;
 
 
 # What titles were added from 2021 onwards in descending order?
-SELECT titles.type,
-titles.title,
-titles.date_added
+
+SELECT titles.type
+, titles.title
+, titles.date_added
 FROM "netflix_titles_info" titles
 WHERE date_added >= '2021-01-01'
-ORDER BY date_added DESC;
+ORDER BY date_added DESC
+;
 
 
 # What is the alphabetical order of all the movies and tv shows?
+
 SELECT title
 FROM "netflix_titles_info"
-ORDER BY title ASC;
+ORDER BY title ASC
+;
 
 
 # Who was the Director for the movie The Starling?
+
 SELECT director
 FROM "netflix_people" people
 
 LEFT JOIN "netflix_titles_info" titles
 ON people.show_id = titles.show_id
-WHERE titles.title = 'The Starling';
+WHERE titles.title = 'The Starling'
+;
 
 
 # What is the oldest movie in the database and what year was it made?
-SELECT title, release_year
+
+SELECT title
+, release_year
 FROM "netflix_titles_info"
 WHERE type = 'Movie'
 ORDER BY release_year ASC
-LIMIT 1;
+LIMIT 1
+;
 
 
 # Netflix could have multiple movies that came out that year. What is the oldest movies without assuming that there was only one that year?
-SELECT title, release_year
+
+SELECT title
+, release_year
 FROM "netflix_titles_info"
 WHERE type = 'Movie'
 AND release_year <=
 (SELECT MIN(release_year)
 FROM "netflix_titles_info"
-WHERE type = 'Movie');
+WHERE type = 'Movie')
+;

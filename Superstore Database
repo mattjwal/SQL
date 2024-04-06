@@ -31,28 +31,34 @@ VALUES
 # For this project, I used SQL to query the Superstore database to get information about items sold at the store and their prices.
 
 # Use a SELECT statement to order the items by price.
-SELECT category, item_name, price, average_rating
+SELECT category
+, item_name
+, price
+, average_rating
 FROM superstore
 WHERE price
 ORDER BY price DESC
 ;
 
 # Show a statistic about the item prices.
-SELECT AVG(average_rating), category
+SELECT AVG(average_rating)
+, category
 FROM superstore
 WHERE category = 'Electronics'
 ORDER BY price DESC
 ;
 
 # Show a statistic about the price for items in the category of "Kitchen Supplies".
-SELECT SUM(price), category
+SELECT SUM(price)
+, category
 FROM superstore
 WHERE category = 'Kitchen Supplies'
 ORDER BY price DESC
 ;
 
 # Show a statistic of your choosing from the Superstore database
-SELECT SUM(stock_quantity), item_name
+SELECT SUM(stock_quantity)
+, item_name
 FROM superstore
 WHERE item_name = 'Smart LED TV'
 ORDER BY stock_quantity

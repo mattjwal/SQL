@@ -5,7 +5,9 @@
 SELECT COUNT(orderID)
 FROM BIT_DB.JanSales
 WHERE LENGTH(orderid) = 6
-AND orderid <> 'Order ID';
+AND orderid <> 'Order ID'
+;
+
 
 # How many of those orders were for an iPhone?
 
@@ -13,7 +15,9 @@ SELECT COUNT(orderid)
 FROM BIT_DB.JanSales
 WHERE Product='iPhone'
 AND length(orderid) = 6
-AND orderid <> 'Order ID';
+AND orderid <> 'Order ID'
+;
+
 
 # Select the customer account numbers for all the orders that were placed in February.
 
@@ -23,38 +27,75 @@ FROM BIT_DB.customers AS Cust
 INNER JOIN BIT_DB.FebSales AS Feb
 ON cust.order_id = Feb.orderID
 WHERE LENGTH(orderid) = 6
-AND orderid <> 'Order ID';
+AND orderid <> 'Order ID'
+;
+
 
 # Which product was the cheapest one sold in January, and what was the price?
 
-SELECT DISTINCT Product, price
+SELECT DISTINCT Product 
+, price
 FROM BIT_DB.JanSales
-WHERE price IN (SELECT MIN(price) FROM BIT_DB.JanSales);
+WHERE price IN (SELECT MIN(price) FROM BIT_DB.JanSales)
+;
+
 
 # What is the total revenue for each product sold in January?
 
 SELECT SUM (quantity)*price AS Revenue
-,Product
+, Product
 FROM BIT_DB.JanSales
-GROUP BY Product;
+GROUP BY Product
+;
+
 
 # Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
 
 SELECT 
-SUM(Quantity),
-Product,
-SUM(Quantity)*price AS Revenue
+SUM(Quantity)
+, Product
+, SUM(Quantity)*price AS Revenue
 FROM BIT_DB.FebSales
 WHERE location = '548 Lincoln St, Seattle, WA 98101'
-GROUP BY Product;
+GROUP BY Product
+;
+
 
 # How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
 
-SELECT COUNT (DISTINCT cust.acctnum) AS Customers, 
-ROUND (AVG (Quantity) * price, 2) AS Average_Amount_Spent
+SELECT COUNT (DISTINCT cust.acctnum) AS Customers
+, ROUND (AVG (Quantity) * price, 2) AS Average_Amount_Spent
 FROM BIT_DB.FebSales Feb
 LEFT JOIN BIT_DB.customers Cust
 ON Feb.orderID = Cust.order_id
 WHERE Feb.Quantity  >  2
 AND LENGTH(orderid) = 6
-AND orderid <> 'Order ID';
+AND orderid <> 'Order ID'
+;
+
+
+# Only select orderdate when it starts with 02/18/19.
+
+SELECT SUM(quantity)
+FROM BIT_DB.FebSales 
+WHERE orderdate like '02/18/19%'
+;
+
+
+# Only select orderdateat any time between 02/13/19 and 02/18/19.
+
+SELECT orderdate
+FROM BIT_DB.FebSales
+WHERE orderdate between '02/13/19 00:00' AND '02/18/19 00:00'
+;
+
+
+# List all the products sold in Los Angeles in February, and include how many of each were sold.
+
+SELECT product
+, SUM(quantity)
+FROM BIT_DB.FebSales
+WHERE location like '%Los Angeles%'
+GROUP BY product
+ORDER BY SUM(quantity) DESC
+;

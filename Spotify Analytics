@@ -1,0 +1,82 @@
+# For this project, I downloaded Spotify data from Break Into Tech.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table:
+
+CREATE TABLE Spotify (
+    id               INTEGER        PRIMARY KEY,
+    artist_name      VARCHAR        NOT NULL,
+    track_name       VARCHAR        NOT NULL,
+    track_id         VARCHAR        NOT NULL,
+    popularity       INTEGER        NOT NULL,
+    danceability     DECIMAL (4, 3) NOT NULL,
+    energy           DECIMAL (4, 3) NOT NULL,
+    song_key         INTEGER        NOT NULL,
+    loudness         DECIMAL (5, 3) NOT NULL,
+    song_mode        INTEGER        NOT NULL,
+    speechiness      DECIMAL (5, 4) NOT NULL,
+    acousticness     DECIMAL (6, 5) NOT NULL,
+    instrumentalness DECIMAL (8, 7) NOT NULL,
+    liveness         DECIMAL (5, 4) NOT NULL,
+    valence          DECIMAL (4, 3) NOT NULL,
+    tempo            DECIMAL (6, 3) NOT NULL,
+    duration_ms      INTEGER        NOT NULL,
+    time_signature   INTEGER        NOT NULL
+);
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data to answer questions using the following SQL. 
+
+
+# What is the average danceability by artist and track?
+
+SELECT 
+artist_name
+, track_name
+, ROUND(AVG(danceability) , 2) AS avg_danceability
+FROM BIT_DB.Spotifydata
+GROUP BY artist_name
+ORDER BY avg_danceability DESC
+;
+
+
+# Who are the top 10 artists based on popularity?
+
+SELECT
+artist_name
+, track_name
+, popularity
+FROM BIT_DB.Spotifydata
+ORDER BY popularity DESC
+LIMIT 10
+;
+
+
+# What artist released the longest song?
+
+SELECT
+artist_name
+, track_name
+, MAX(duration_ms)
+FROM BIT_DB.Spotifydata
+LIMIT 1
+;
+
+
+# What's the average danceability for the 10 most popular songs?
+
+SELECT
+artist_name
+, track_name
+, popularity
+, ROUND(AVG(danceability) , 2) AS avg_danceability
+FROM BIT_DB.Spotify
+
+WHERE (artist_name , track_name) 
+IN (SELECT artist_name , track_name FROM BIT_DB.Spotify ORDER BY popularity DESC LIMIT 10)
+
+GROUP BY artist_name , track_name , popularity
+ORDER BY popularity DESC
+;

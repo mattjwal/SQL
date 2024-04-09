@@ -80,3 +80,45 @@ IN (SELECT artist_name , track_name FROM BIT_DB.Spotify ORDER BY popularity DESC
 GROUP BY artist_name , track_name , popularity
 ORDER BY popularity DESC
 ;
+
+
+# What is the distribution of energy levels for the top 10 most popular tracks?
+
+SELECT
+artist_name AS artist
+, track_name AS track
+, popularity
+, ROUND(AVG(energy) , 2) AS avg_energy
+FROM BIT_DB.Spotify
+GROUP BY artist , track
+ORDER BY popularity DESC
+LIMIT 10
+;
+
+
+# What are the top 10 songs that have the highest valence and what are their liveness?
+
+SELECT 
+artist_name AS artist
+, track_name AS track
+, ROUND(valence , 2) AS valence
+, ROUND(liveness , 3) AS liveness
+FROM BIT_DB.Spotify
+ORDER BY valence DESC
+LIMIT 10
+;
+
+
+# Which tracks have the highest instrumentalness but the lowest danceability?
+
+SELECT
+artist_name AS artist
+, track_name AS track
+, instrumentalness AS max_instrumentalness
+, danceability AS low_danceability
+FROM BIT_DB.Spotify
+ORDER BY
+instrumentalness DESC
+, danceability ASC
+LIMIT 10
+;

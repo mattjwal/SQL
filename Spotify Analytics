@@ -36,7 +36,7 @@ SELECT
 artist_name
 , track_name
 , ROUND(AVG(danceability) , 2) AS avg_danceability
-FROM BIT_DB.Spotifydata
+FROM BIT_DB.Spotify
 GROUP BY artist_name
 ORDER BY avg_danceability DESC
 ;
@@ -48,7 +48,7 @@ SELECT
 artist_name
 , track_name
 , popularity
-FROM BIT_DB.Spotifydata
+FROM BIT_DB.Spotify
 ORDER BY popularity DESC
 LIMIT 10
 ;
@@ -60,7 +60,7 @@ SELECT
 artist_name
 , track_name
 , MAX(duration_ms)
-FROM BIT_DB.Spotifydata
+FROM BIT_DB.Spotify
 LIMIT 1
 ;
 

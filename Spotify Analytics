@@ -1,10 +1,15 @@
-# For this project, I downloaded Spotify data from Break Into Tech.
-# Then I created a table to insert Spotify data into.
-# Finally, I performed analytics on the data using SQL. 
+-- Spotify Top 50 (2021) — SQL Analysis
 
-#Creating the table:
 
-CREATE TABLE Spotify (
+-- What I did:
+-- Downloaded the Spotify Top 50 (2021) dataset from Break Into Tech.
+-- Created a table (`Spotifydata`) and inserted the CSV data into it.
+-- Wrote and answered 8 original questions using SQL.
+
+
+-- Creating the table:
+
+CREATE TABLE Spotifydata (
     id               INTEGER        PRIMARY KEY,
     artist_name      VARCHAR        NOT NULL,
     track_name       VARCHAR        NOT NULL,
@@ -25,118 +30,103 @@ CREATE TABLE Spotify (
     time_signature   INTEGER        NOT NULL
 );
 
-#Then I inserted the Spotify Data .csv into the table.
+-- Then I inserted the Spotify Data .csv into the table.
 
-#Next, I explored the data to answer questions using the following SQL. 
-
-
-# What is the average danceability by artist and track?
-
-SELECT 
-artist_name
-, track_name
-, ROUND(AVG(danceability) , 2) AS avg_danceability
-FROM BIT_DB.Spotify
-GROUP BY artist_name
-ORDER BY avg_danceability DESC
-;
+-- Next, I explored the data to answer questions using the following SQL. 
 
 
-# Who are the top 10 artists based on popularity?
-
-SELECT
-artist_name
+-- What tempo category does each track fall into, and how popular is each track?
+SELECT artist_name
 , track_name
 , popularity
-FROM BIT_DB.Spotify
-ORDER BY popularity DESC
-LIMIT 10
-;
-
-
-# What artist released the longest song?
-
-SELECT
-artist_name
-, track_name
-, MAX(duration_ms)
-FROM BIT_DB.Spotify
-LIMIT 1
-;
-
-
-# What's the average danceability for the 10 most popular songs?
-
-SELECT
-artist_name
-, track_name
-, popularity
-, ROUND(AVG(danceability) , 2) AS avg_danceability
-FROM BIT_DB.Spotify
-
-WHERE (artist_name , track_name) 
-IN (SELECT artist_name , track_name FROM BIT_DB.Spotify ORDER BY popularity DESC LIMIT 10)
-
-GROUP BY artist_name , track_name , popularity
+, CASE
+     WHEN tempo < 90 THEN 'slow'
+     WHEN tempo BETWEEN 90 AND 100 THEN 'medium'
+     ELSE 'fast'
+END AS tempo_category
+FROM BIT_DB.Spotifydata
 ORDER BY popularity DESC
 ;
 
 
-# What is the distribution of energy levels for the top 10 most popular tracks?
-
-SELECT
-artist_name AS artist
-, track_name AS track
+-- Which tracks are both more popular than average AND more energetic than average?
+SELECT artist_name
+, track_name
 , popularity
+, ROUND(energy  , 2) AS energy
+FROM BIT_DB.Spotifydata
+WHERE popularity > (SELECT AVG(popularity) FROM BIT_DB.Spotifydata)
+AND energy > (SELECT AVG(energy) FROM BIT_DB.Spotifydata)
+ORDER BY energy DESC
+;
+
+
+-- Which artists have more than one track in the dataset, and what's their average popularity?
+SELECT artist_name
+, COUNT(*) AS num_tracks
+, ROUND(AVG(popularity) , 2) AS avg_popularity
+FROM BIT_DB.Spotifydata
+GROUP BY artist_name HAVING COUNT(*) > 1
+ORDER BY avg_popularity DESC
+;
+
+
+-- For artists with multiple tracks, which of their songs scores above their own average popularity?
+SELECT artist_name
+, track_name
+, popularity
+FROM BIT_DB.Spotifydata AS OuterTable
+WHERE popularity >
+(SELECT AVG(InnerTable.popularity) 
+FROM BIT_DB.Spotifydata AS InnerTable
+WHERE InnerTable.artist_name = OuterTable.artist_name)
+ORDER BY popularity DESC
+;
+
+
+-- What are the minimum, maximum, and average values for danceability and energy across all 50 tracks?
+SELECT
+ROUND(MIN(danceability) , 2) AS min_danceability
+, ROUND(MAX(danceability) , 2) AS max_danceability
+, ROUND(AVG(danceability) , 2) AS avg_danceability
+, ROUND(MIN(energy) , 2) AS min_energy
+, ROUND(MAX(energy) , 2) AS max_energy
 , ROUND(AVG(energy) , 2) AS avg_energy
-FROM BIT_DB.Spotify
-GROUP BY artist , track
-ORDER BY popularity DESC
-LIMIT 10
+FROM BIT_DB.Spotifydata
 ;
 
 
-# What are the top 10 songs that have the highest valence and what are their liveness?
-
-SELECT 
-artist_name AS artist
-, track_name AS track
-, ROUND(valence , 2) AS valence
-, ROUND(liveness , 3) AS liveness
-FROM BIT_DB.Spotify
-ORDER BY valence DESC
-LIMIT 10
+-- Do tracks with "feat." or a remix/edit marker in the title (parentheses) have different average popularity than tracks without?
+SELECT track_name LIKE '%(%' AS has_parentheses
+, COUNT(*) AS num_tracks
+, ROUND(AVG(popularity) , 2) AS avg_popularity
+FROM BIT_DB.Spotifydata
+GROUP BY has_parentheses
 ;
 
 
-# Which tracks have the highest instrumentalness but the lowest danceability?
-
-SELECT
-artist_name AS artist
-, track_name AS track
-, instrumentalness AS max_instrumentalness
-, danceability AS low_danceability
-FROM BIT_DB.Spotify
-ORDER BY
-instrumentalness DESC
-, danceability ASC
-LIMIT 10
+-- Which pairs of tracks share the same musical key, and how do their tempos compare?
+SELECT a.artist_name AS artist_a
+, a.track_name AS track_name_a
+, a.tempo AS tempo_a
+, b.artist_name AS artist_b
+, b.track_name AS track_name_b
+, b.tempo AS tempo_b
+, a.song_key
+FROM BIT_DB.Spotifydata AS a
+INNER JOIN BIT_DB.Spotifydata AS b
+ON a.song_key = b.song_key
+WHERE a.id < b.id
 ;
 
 
-# Using a CTE, Calculate the average popularity for the artists in the Spotify table. Then, for every artist with an average popularity of 90 or above, show their name, their average popularity, and label them as a “Top Star”.
-
-WITH popularity_average_CTE AS (
-SELECT s.artist_name
-, AVG(popularity) AS average_popularity
-FROM Spotify s
-GROUP BY s.artist_name
-)
-
-SELECT
-artist_name
-, average_popularity
-, 'Top Star'  AS tag
-FROM popularity_average_CTE
-WHERE average_popularity >= 90
+-- Which tracks have above-average energy and above-average danceability ("Dance Floor Ready")?
+SELECT artist_name
+, track_name
+, energy
+, danceability
+, 'Dance Floor Ready' AS tag
+FROM BIT_DB.Spotifydata
+WHERE energy > (SELECT AVG(energy) FROM BIT_DB.Spotifydata)
+AND danceability > (SELECT AVG(danceability) FROM BIT_DB.Spotifydata)
 ;

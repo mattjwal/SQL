@@ -1,161 +1,84 @@
-# In this SQL, I'm querying a multi-table database to quantify statistics about customer behaviour and order patterns. 
+-- Project overview:
+-- In this SQL, I'm querying a multi-table database to quantify statistics about customer behaviour and order patterns. 
+-- This project analyzes retail sales and customer order data from the BIT_DB database.
+-- The source data contains known data quality issues (stray header rows imported as records, blank rows),
+-- which several queries below explicitly clean/filter out using order ID length and value checks.
 
-# How many orders were placed in January?
+-- This file contains 8 queries answering business questions about order volume, product performance, revenue, and
+-- customer spending behavior:
 
-SELECT COUNT(orderID)
-FROM BIT_DB.JanSales
-WHERE LENGTH(orderid) = 6
-AND orderid <> 'Order ID'
+
+-- Clean order_id data to display correct order ID values.
+SELECT * 
+FROM BIT_DB.customers
+WHERE LENGTH(order_id) = 6
+AND order_id <> 'Order ID'
 ;
 
-
-# How many of those orders were for an iPhone?
-
-SELECT COUNT(orderid)
+-- How many unique orders were placed in January?
+SELECT COUNT(DISTINCT orderID)
 FROM BIT_DB.JanSales
-WHERE Product='iPhone'
-AND length(orderid) = 6
-AND orderid <> 'Order ID'
+WHERE LENGTH(orderID) = 6
+AND orderID <> 'Order ID'
 ;
 
+-- How many of those orders were for an iPhone?
+SELECT COUNT(DISTINCT orderID)
+FROM BIT_DB.JanSales
+WHERE Product = 'iPhone'
+AND LENGTH(orderID) = 6
+AND orderID <> 'Order ID'
+;
 
-# Select the customer account numbers for all the orders that were placed in February.
-
+-- Select the customer account numbers for all the orders that were placed in February.
 SELECT DISTINCT acctnum
-FROM BIT_DB.customers AS Cust
+FROM BIT_DB.customers AS customers
 
-INNER JOIN BIT_DB.FebSales AS Feb
-ON cust.order_id = Feb.orderID
-WHERE LENGTH(orderid) = 6
-AND orderid <> 'Order ID'
+INNER JOIN BIT_DB.FebSales AS February
+ON customers.order_id = February.orderID
+
+WHERE LENGTH(orderID) = 6
+AND orderID <> 'Order ID'
 ;
 
-
-# Which product was the cheapest one sold in January, and what was the price?
-
-SELECT DISTINCT Product 
-, price
+-- Which product was the cheapest one sold in January, and what was the price?
+SELECT DISTINCT Product
+, Price
 FROM BIT_DB.JanSales
-WHERE price IN (SELECT MIN(price) FROM BIT_DB.JanSales)
+WHERE Price IN (SELECT MIN(Price) FROM BIT_DB.JanSales)
 ;
 
-
-# What is the total revenue for each product sold in January?
-
-SELECT SUM (quantity)*price AS Revenue
-, Product
+-- What is the total revenue for each product sold in January?
+SELECT Product
+, ROUND(SUM(quantity)*price, 2) AS Revenue
 FROM BIT_DB.JanSales
+WHERE Product != 'Product'
+AND Product IS NOT NULL
+AND Product != ''
 GROUP BY Product
 ;
 
-
-# Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
-
-SELECT 
-SUM(Quantity)
-, Product
+-- Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, 
+-- how many of each were sold
+-- what was the total revenue?
+SELECT Product
+, SUM(Quantity) AS TotalQuantity
 , SUM(Quantity)*price AS Revenue
 FROM BIT_DB.FebSales
 WHERE location = '548 Lincoln St, Seattle, WA 98101'
 GROUP BY Product
 ;
 
+-- How many customers ordered more than 2 products at a time in February
+-- what was the average amount spent for those customers?
+SELECT COUNT(DISTINCT Customers.acctnum) AS Customer_Accounts
+, ROUND(AVG(Quantity*price), 2) AS Avg_Amount_Spent
+FROM BIT_DB.FebSales AS February
 
-# How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+LEFT JOIN BIT_DB.customers AS Customers
+ON February.orderID = Customers.order_id
 
-SELECT COUNT (DISTINCT cust.acctnum) AS Customers
-, ROUND (AVG (Quantity) * price, 2) AS Average_Amount_Spent
-FROM BIT_DB.FebSales Feb
-LEFT JOIN BIT_DB.customers Cust
-ON Feb.orderID = Cust.order_id
-WHERE Feb.Quantity  >  2
-AND LENGTH(orderid) = 6
-AND orderid <> 'Order ID'
-;
-
-
-# Only select orderdate when it starts with 02/18/19.
-
-SELECT SUM(quantity)
-FROM BIT_DB.FebSales 
-WHERE orderdate like '02/18/19%'
-;
-
-
-# Only select orderdateat any time between 02/13/19 and 02/18/19.
-
-SELECT orderdate
-FROM BIT_DB.FebSales
-WHERE orderdate between '02/13/19 00:00' AND '02/18/19 00:00'
-;
-
-
-# List all the products sold in Los Angeles in February, and include how many of each were sold.
-
-SELECT product
-, SUM(quantity)
-FROM BIT_DB.FebSales
-WHERE location like '%Los Angeles%'
-GROUP BY product
-ORDER BY SUM(quantity) DESC
-;
-
-
-# Which locations in New York received at least 3 orders in January, and how many orders did they each receive?
-
-SELECT distinct location
-, COUNT(orderID)
-FROM BIT_DB.JanSales
-WHERE location like '%NY%'
-AND LENGTH(orderid) = 6
-AND orderid <> 'Order ID'
-GROUP BY location
-HAVING COUNT(orderID) > 2
-;
-
-
-# How many of each type of headphone were sold in February?
-
-SELECT Product
-, SUM(Quantity) AS Quantity
-FROM BIT_DB.FebSales
-WHERE Product like '%Headphones%'
-GROUP BY Product
-;
-
-
-# What was the average amount spent per account in February?
-
-SELECT avg(quantity*price) AS Avg_Amount_Spent
-FROM BIT_DB.FebSales Feb
-
-LEFT JOIN BIT_DB.customers cust
-ON FEB.orderid = cust.order_id
-
-WHERE length(orderid) = 6 
-AND orderid <> 'Order ID'
-;
-
-
-# What was the average quantity of products purchased per account in February?
-
-SELECT SUM(Quantity) / COUNT(cust.acctnum) AS Avg_Product_Purchase_Quantity
-FROM BIT_DB.FebSales Feb
-
-LEFT JOIN BIT_DB.customers Cust
-ON Feb.orderID = Cust.order_id
-
-WHERE length(orderid) = 6 
-AND orderid <> 'Order ID'
-;
-
-
-# Which product brought in the most revenue in January and how much revenue did it bring in total?
-
-SELECT Product
-, SUM(Quantity*Price) AS Total_Revenue
-FROM BIT_DB.JanSales
-GROUP BY Product
-ORDER BY Total_Revenue DESC
-LIMIT 1
+WHERE February.Quantity > 2
+AND LENGTH(orderID) = 6
+AND orderID <> 'Order ID'
 ;
